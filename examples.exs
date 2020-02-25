@@ -45,7 +45,7 @@ receiver = spawn(fn() ->
 	receive do
 		{:data, data} ->
 			IO.inspect(data, label: "I received a message!")
-	end	
+	end
 end)
 
 send(receiver, {:data, "something!!!"})
@@ -57,7 +57,7 @@ send(receiver, {:data, "something!!!"})
 a = fn(x) ->
 	requester = self()
 
-	pid = spawn(fn() -> 
+	pid = spawn(fn() ->
 		answer = x * x
 		send(requester, {:answer, answer})
 	end)
@@ -99,48 +99,52 @@ end
 
 
 
+ me = self()
+ spawn(fn() -> ChatServer.start([me]) end)
+ send(ChatServer, {:message, {"Joe", "I really hope this works"}})
 
-defmodule ChatClient do
-	
-	def start(client_connection) do
-		spawn(fn -> client_loop(client_connection) end)
-	end
+ receive do
+  {:message, {sender, message}} ->
+   IO.inspect(message, label: "I received - #{message} - from #{sender}")
+ end
 
-	defp client_loop(client_connection) do
-		receive do
-			{:message_from_connection, message} ->
-				IO.inspect("CLIENT: SENDING MESSAGE TO SERVER")
-				send(ChatServer, {:message, message})
-			{:message_from_server, message} ->
-				IO.inspect("CLIENT: RECEIVING MESSAGE FROM SERVER")
-				send(client_connection, message)
-		end
 
-		client_loop(client_connection)
-	end
+# Generic Server Example
+defmodule GenericServer do
+  use GenServer
 
-	def send_msg(client, msg) do
-		send(client, {:message_from_connection, msg})
-	end
+  @impl true
+  def init([]) do
+    {:ok, []}
+  end
+  
+  #  [pid]
 
+  @impl true
+  def handle_call({:new_message, message}, from, clients) do
+    Enum.each(clients, fn client ->
+      send(client, {:message, message})
+    end)
+
+    {:reply, :ok, clients}
+  end
+
+  @impl true
+  def handle_call({:new_client, client}, _from, clients) do
+    {:reply, :ok, [client | clients]}
+  end
 end
 
-#  Chat Server Demo
+# {:ok, server_pid} = GenServer.start_link(GenericServer, [])
 
-my_client = ChatClient.start(self())
-ChatServer.start([my_client])
+# GenServer.call(server_pid, {:new_client, self()})
 
-# me = self()
-# spawn(fn() -> ChatServer.start([me]) end)
-# send(ChatServer, {:message, {"Joe", "I really hope this works"}})
-
-# receive do
-#  {:message, {sender, message}} ->
-#   IO.inspect(message, label: "I received - #{message} - from #{sender}")
-# end
+# GenServer.call(server_pid, {:new_message, "some message"})
 
 
-# DISTRIBUTED EXAMPLE
+
+# DISTRIBUTED EXAMPLE - we skipped over this part in the presentation, as we needed to move on
+# In this example, the chat server can be running on a different computer than the client :)
 
 defmodule ChatServer do
 

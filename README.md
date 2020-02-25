@@ -2,8 +2,13 @@
 
 PLEASE SEE examples.exs :)
 
+### Helpful Links/Reading:
 
- Joe xoxo
+Processes: https://elixir-lang.org/getting-started/processes.html
+
+Generic Servers (GenServer): https://elixirschool.com/en/lessons/advanced/otp-concurrency/
+
+Elixir is based on Erlang - everything I covered today applies to Erlang to, you can read about Erlang here: https://learnyousomeerlang.com/introduction#what-is-erlang
 
                         _,--._
                       ,'      `.
@@ -18,4 +23,3 @@ PLEASE SEE examples.exs :)
            \o\     ,'  ,'    `.  `.     /o/
             \o`---'  ,'        `.  `---'o/
              `.____,'            `.____,'
-
